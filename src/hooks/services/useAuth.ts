@@ -2,9 +2,9 @@ import AppError from '../../errors/AppError';
 import { useRequest } from '../providers/useRequest';
 
 export const useAuth = () => {
-  const path = 'auth';
+  const path = 'signin';
   const request = useRequest();
-  const login = async (email: string, password: string): Promise<any> => {
+  const signin = async (email: string, password: string): Promise<any> => {
     const body = { email, password };
     return await request
       .post({ path, body })
@@ -16,5 +16,5 @@ export const useAuth = () => {
       });
   };
 
-  return { login };
+  return { signin };
 };
