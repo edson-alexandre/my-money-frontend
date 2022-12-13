@@ -1,15 +1,35 @@
 import { Box } from '@chakra-ui/react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { useContext } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import UserContext from '../context/user/UserContext';
 import Home from '../pages/Home/Home';
 import Login from '../pages/login/Login';
 
 const Content = () => {
+  const { state } = useContext(UserContext);
+
   return (
-    <Box width="100%" height="100%" flex={1} p={3}>
+    <Box
+      style={{
+        height: 'calc(100vh - 45px - 30px)', // view height - header - footer
+        overflow: 'auto',
+        width: '100%',
+        flex: 1,
+      }}
+    >
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/home" element={<Home />} />
+          {state.logged ? (
+            <>
+              <Route path="/home" element={state.logged ? <Home /> : <Navigate to="/login" />} />
+              <Route path="*" element={<Navigate to="/home" />} />
+            </>
+          ) : (
+            <>
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<Navigate to="/login" />} />
+            </>
+          )}
         </Routes>
       </BrowserRouter>
     </Box>

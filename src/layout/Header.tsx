@@ -4,9 +4,23 @@ import { Box, Grid } from '@chakra-ui/react';
 import UserContext from '../context/user/UserContext';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
 import MenuContext from '../context/menu/MenuContext';
+
+import { useLocalStorage } from '../hooks/providers/useLocalStorage';
+
 const Header = () => {
-  const { state } = useContext(UserContext);
+  const { state, setState } = useContext(UserContext);
   const { state: menuState, setState: setMenuState } = useContext(MenuContext);
+  const localStorage = useLocalStorage();
+
+  const signout = () => {
+    setState({
+      email: '',
+      name: '',
+      logged: false,
+      token: '',
+    });
+    localStorage.clear();
+  };
 
   return (
     <Grid
@@ -48,8 +62,9 @@ const Header = () => {
       <Box fontSize="1.7em" fontWeight={900} display="flex">
         My Money
       </Box>
-      <Box display="flex" flex={1} justifyContent="flex-end">
+      <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
         <ColorModeSwitcher />
+        <i className="bi bi-power mx-3 " style={{ fontSize: '1.2em', cursor: 'pointer' }} onClick={() => signout()} />
       </Box>
     </Grid>
   );

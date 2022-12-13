@@ -1,0 +1,16 @@
+.main-menu {
+    font-size: 1.5em;   
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.item-menu {
+    font-size: 1.2em;   
+    cursor: pointer;    
+    padding: 10px 10px 0px 30px ;  
+}

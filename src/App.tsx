@@ -15,6 +15,7 @@ export const App = () => {
   return (
     <ChakraProvider theme={theme}>
       <Grid
+        overflow="hidden"
         templateAreas={
           menuState.isVisible && userState.logged
             ? `"header header"
@@ -27,8 +28,6 @@ export const App = () => {
         gridTemplateRows={'45px 1fr 30px'}
         gridTemplateColumns={'250px 1fr'}
         h="100vh"
-        padding="0px"
-        overflow="hidden"
       >
         <GridItem area={'header'}>
           <Header />
