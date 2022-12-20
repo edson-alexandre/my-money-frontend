@@ -1,17 +1,19 @@
-import { Box } from '@chakra-ui/react';
+import { Box, useColorModeValue } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import UserContext from '../context/user/UserContext';
-import Account from '../pages/Account/Account';
-import AccountsPayable from '../pages/AccountsPayable/AccountsPayable';
-import AccountsReceivable from '../pages/AccountsReceivable/AccountsReceivable';
+import Account from '../pages/account/Account';
+import AccountsPayable from '../pages/accountsPayable/AccountsPayable';
+import AccountsReceivable from '../pages/accountsReceivable/AccountsReceivable';
 import Customer from '../pages/customer/Customer';
+import CustomerForm from '../pages/customer/CustomerForm';
 import Home from '../pages/Home/Home';
 import Login from '../pages/login/Login';
 import Supplier from '../pages/supplier/Supplier';
 
 const Content = () => {
   const { state } = useContext(UserContext);
+  const colorMode = useColorModeValue('light', 'dark');
 
   return (
     <Box
@@ -20,6 +22,7 @@ const Content = () => {
         overflow: 'auto',
         width: '100%',
         flex: 1,
+        backgroundColor: colorMode === 'dark' ? '#222' : '#dfdfdf',
       }}
     >
       <Routes>
@@ -28,6 +31,8 @@ const Content = () => {
             <Route path="/home" element={<Home />} />
             <Route path="/account" element={<Account />} />
             <Route path="/customer" element={<Customer />} />
+            <Route path="/customer/:id/edit" element={<CustomerForm />} />
+            <Route path="/customer/:id/new" element={<CustomerForm />} />
             <Route path="/supplier" element={<Supplier />} />
             <Route path="/accounts-receivable" element={<AccountsReceivable />} />
             <Route path="/accounts-payable" element={<AccountsPayable />} />

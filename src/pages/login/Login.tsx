@@ -54,7 +54,7 @@ const Login = () => {
   } = useForm<IFormInputs>({
     resolver: yupResolver(schema),
   });
-  const colorMode = useColorModeValue('dark', 'light');
+  const colorMode = useColorModeValue('light', 'dark');
   const [showPassword, setShowPassword] = useState(false);
 
   const submitForm = async (data: IFormInputs) => {
@@ -107,7 +107,7 @@ const Login = () => {
         width="500px"
         height="300px"
         borderRadius={10}
-        backgroundColor={colorMode === 'light' ? '#222' : '#33acdd'}
+        backgroundColor={colorMode === 'dark' ? '#33acdd' : '#33acdd'}
         p={5}
       >
         <Box display="flex" justifyContent="center" fontSize="1.3em" fontWeight={600}>
@@ -117,7 +117,7 @@ const Login = () => {
           style={{
             width: '97%',
             minHeight: 0.07,
-            backgroundColor: colorMode === 'light' ? '#fff' : '#fff',
+            backgroundColor: colorMode === 'dark' ? '#fff' : '#fff',
           }}
         ></div>
 
@@ -133,7 +133,7 @@ const Login = () => {
                   type="text"
                   placeholder="E-mail"
                   size="sm"
-                  backgroundColor={colorMode === 'light' ? '#222' : '#fff'}
+                  backgroundColor={colorMode === 'dark' ? '#222' : '#fff'}
                 />
               </InputGroup>
               <Box minHeight="1em">
@@ -157,7 +157,7 @@ const Login = () => {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Senha"
                   size="sm"
-                  backgroundColor={colorMode === 'light' ? '#222' : '#fff'}
+                  backgroundColor={colorMode === 'dark' ? '#222' : '#fff'}
                 />
               </InputGroup>
               <Box minHeight="1em">
@@ -166,8 +166,8 @@ const Login = () => {
             </FormControl>
             <Box>
               <Button
-                backgroundColor={colorMode === 'light' ? '#fff' : '#fff'}
-                color={colorMode === 'light' ? '#000' : '#000'}
+                backgroundColor={colorMode === 'dark' ? '#fff' : '#fff'}
+                color={colorMode === 'dark' ? '#000' : '#000'}
                 py={2}
                 type="submit"
                 size="sm"
