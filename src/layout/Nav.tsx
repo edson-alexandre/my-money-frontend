@@ -2,6 +2,7 @@ import { Box } from '@chakra-ui/react';
 import { useState } from 'react';
 import './Nav.css';
 import { Collapse } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const Nav = () => {
   const [toggleRegistration, setToggleRegistration] = useState(false);
@@ -22,9 +23,15 @@ const Nav = () => {
       </div>
       <Collapse in={toggleRegistration}>
         <div>
-          <div className="item-menu">Plano de Contas</div>
-          <div className="item-menu">Clientes</div>
-          <div className="item-menu">Fornecedores</div>
+          <div className="item-menu">
+            <Link to={'/account'}>Plano de Contas</Link>
+          </div>
+          <div className="item-menu">
+            <Link to={'/customer'}>Clientes</Link>
+          </div>
+          <div className="item-menu">
+            <Link to={'/supplier'}>Fornecedores</Link>
+          </div>
         </div>
       </Collapse>
       <div onClick={() => setToggleMovements(!toggleMovements)} className="main-menu">
@@ -33,8 +40,12 @@ const Nav = () => {
       </div>
       <Collapse in={toggleMovements}>
         <div>
-          <div className="item-menu">Contas a Pagar</div>
-          <div className="item-menu">Contas a Receber</div>
+          <div className="item-menu">
+            <Link to={'/accounts-payable'}>Contas a Pagar</Link>
+          </div>
+          <div className="item-menu">
+            <Link to={'/accounts-receivable'}>Contas a Receber</Link>
+          </div>
         </div>
       </Collapse>
     </Box>
