@@ -22,6 +22,7 @@ const Nav = () => {
       </div>
       <Collapse in={toggleRegistration}>
         <div>
+          <div className="item-menu">Plano de Contas</div>
           <div className="item-menu">Clientes</div>
           <div className="item-menu">Fornecedores</div>
         </div>

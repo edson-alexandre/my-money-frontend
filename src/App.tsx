@@ -1,16 +1,21 @@
-import { ChakraProvider, Grid, GridItem, theme } from '@chakra-ui/react';
+import { SlideFade, ChakraProvider, Grid, GridItem, theme, useDisclosure } from '@chakra-ui/react';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import Content from './layout/Content';
 import Nav from './layout/Nav';
 
 import MenuContext from './context/menu/MenuContext';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import UserContext from './context/user/UserContext';
 
 export const App = () => {
-  const { state: menuState, setState: setMenuState } = useContext(MenuContext);
+  const { state: menuState } = useContext(MenuContext);
   const { state: userState } = useContext(UserContext);
+  const { onToggle } = useDisclosure();
+
+  useEffect(() => {
+    onToggle();
+  }, [menuState, onToggle]);
 
   return (
     <ChakraProvider theme={theme}>
@@ -34,7 +39,9 @@ export const App = () => {
         </GridItem>
         {menuState.isVisible && userState.logged ? (
           <GridItem area={'nav'}>
-            <Nav />
+            <SlideFade in={true} style={{ height: '100%', zIndex: 10 }}>
+              <Nav />
+            </SlideFade>
           </GridItem>
         ) : null}
         <GridItem area={'main'}>

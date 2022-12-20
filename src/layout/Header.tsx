@@ -45,17 +45,6 @@ const Header = () => {
               }}
               onClick={() => setMenuState({ ...menuState, isVisible: !menuState.isVisible })}
             />
-            <i
-              className="bi bi-emoji-smile-fill"
-              style={{
-                color: 'yellow',
-                fontSize: '2em',
-                marginLeft: '200px',
-              }}
-            />
-            <Box>
-              <span style={{ fontWeight: 900, fontSize: '1.2em', marginLeft: 20 }}>Olá {state.name}!</span>{' '}
-            </Box>
           </>
         )}
       </Box>
@@ -64,7 +53,9 @@ const Header = () => {
       </Box>
       <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
         <ColorModeSwitcher />
-        <i className="bi bi-power mx-3 " style={{ fontSize: '1.2em', cursor: 'pointer' }} onClick={() => signout()} />
+        {state.logged ? (
+          <i className="bi bi-power mx-3 " style={{ fontSize: '1.2em', cursor: 'pointer' }} onClick={() => signout()} />
+        ) : null}
       </Box>
     </Grid>
   );
