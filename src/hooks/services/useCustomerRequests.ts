@@ -1,3 +1,4 @@
+import { ICustomer } from './../../interfaces/ICustomer';
 import AppError from '../../errors/AppError';
 import { useRequest } from '../providers/useRequest';
 
@@ -33,5 +34,50 @@ export const useCustomerRequests = () => {
       });
   };
 
-  return { listCustomers, listCustomerById };
+  const createCustomer = async (customer: ICustomer): Promise<any> => {
+    return await request
+      .post({
+        path: `${path}`,
+        sendAuthorization: true,
+        body: customer,
+      })
+      .then(customer => {
+        return customer;
+      })
+      .catch(error => {
+        throw new AppError(error.message, error.status);
+      });
+  };
+
+  const updateCustomer = async (customerId: string, customer: ICustomer): Promise<any> => {
+    return await request
+      .put({
+        path: `${path}/${customerId}`,
+        sendAuthorization: true,
+        body: customer,
+      })
+      .then(customer => {
+        return customer;
+      })
+      .catch(error => {
+        throw new AppError(error.message, error.status);
+      });
+  };
+
+  const removeCustomer = async (customerId: string, customer: ICustomer): Promise<any> => {
+    return await request
+      .remove({
+        path: `${path}/${customerId}`,
+        sendAuthorization: true,
+        body: customer,
+      })
+      .then(customer => {
+        return customer;
+      })
+      .catch(error => {
+        throw new AppError(error.message, error.status);
+      });
+  };
+
+  return { listCustomers, listCustomerById, createCustomer, updateCustomer, removeCustomer };
 };

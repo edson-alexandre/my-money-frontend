@@ -40,6 +40,58 @@ export const useRequest = () => {
       });
   };
 
+  const put = async (request: IRequest): Promise<void> => {
+    const headers = { ...request.headers };
+    if (request.sendAuthorization) {
+      headers.Authorization = `Bearer ${userState.token}`;
+    }
+    return await axios({
+      url: `${baseUrl}/${request.path}`,
+      method: 'PUT',
+      headers,
+      data: { ...request.body },
+    })
+      .then((res: any) => {
+        return res.data;
+      })
+      .catch(error => {
+        throw new AppError(
+          error?.response?.data?.validation?.params?.message ||
+            error?.response?.data?.validation?.body?.message ||
+            error?.response?.data?.validation?.query?.message ||
+            error?.response?.data?.message ||
+            'Ocorreu um erro ao executar o procedimento',
+          error?.response.status || 400,
+        );
+      });
+  };
+
+  const remove = async (request: IRequest): Promise<void> => {
+    const headers = { ...request.headers };
+    if (request.sendAuthorization) {
+      headers.Authorization = `Bearer ${userState.token}`;
+    }
+    return await axios({
+      url: `${baseUrl}/${request.path}`,
+      method: 'DELETE',
+      headers,
+      data: { ...request.body },
+    })
+      .then((res: any) => {
+        return res.data;
+      })
+      .catch(error => {
+        throw new AppError(
+          error?.response?.data?.validation?.params?.message ||
+            error?.response?.data?.validation?.body?.message ||
+            error?.response?.data?.validation?.query?.message ||
+            error?.response?.data?.message ||
+            'Ocorreu um erro ao executar o procedimento',
+          error?.response.status || 400,
+        );
+      });
+  };
+
   const get = async (request: IRequest): Promise<void> => {
     const headers = { ...request.headers };
     if (request.sendAuthorization) {
@@ -65,5 +117,5 @@ export const useRequest = () => {
       });
   };
 
-  return { post, get };
+  return { post, get, put, remove };
 };

@@ -2,6 +2,7 @@ import { Card } from '@chakra-ui/react';
 
 interface PageTitleProps {
   title: string;
+  children?: any;
 }
 
 const PageTitle = (props: PageTitleProps) => {
@@ -11,10 +12,13 @@ const PageTitle = (props: PageTitleProps) => {
         style={{
           color: '#7f7f7f',
           fontSize: '1.2em',
+          justifyContent: 'space-between',
         }}
-        className="p-3 d-flex align-items-start justify-content-center"
+        className="p-3"
+        direction="row"
       >
-        {props.title}
+        <div>{props.title}</div>
+        <div>{props.children}</div>
       </Card>
     </div>
   );

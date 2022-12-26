@@ -2,6 +2,7 @@ export interface ICustomer {
   id?: string;
   name: string;
   email: string;
+  personType?: string;
   cgcCpf: string;
   contact?: string;
   city: string;
