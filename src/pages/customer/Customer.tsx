@@ -1,9 +1,9 @@
 import { Button, Progress, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
-import { useToast } from '@chakra-ui/toast';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CustomAlertDialog } from '../../components/AlertDialog/CustomAlertDialog';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import { useToastr } from '../../hooks-util/useToastr';
 import { useCustomerRequests } from '../../hooks/services/useCustomerRequests';
 import { ICustomAlertRef } from '../../interfaces/ICustomAlertRef';
 import { ICustomer } from '../../interfaces/ICustomer';
@@ -25,34 +25,26 @@ const initialCustomer = {
 };
 
 const Customer = () => {
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState<ICustomer[]>([{ ...initialCustomer }]);
   const [customerId, setCustomerId] = useState<string>('');
   const [customer, setCustomer] = useState<ICustomer>({ ...initialCustomer });
   const [loading, setLoading] = useState(false);
-  const toast = useToast();
   const customerRequest = useCustomerRequests();
   const alertRef = useRef<ICustomAlertRef>(null);
   const navigate = useNavigate();
+  const toastr = useToastr();
 
   const loadCustomers = async () => {
     setLoading(true);
     await customerRequest
-      .listCustomers()
+      .list?.()
       .then(customers => {
         setLoading(false);
         setCustomers(customers);
       })
       .catch(error => {
         setLoading(false);
-        toast({
-          title: 'Ocorreu um erro ao carregar os dados',
-          description: error.message,
-          status: 'error',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('error', 'Ocorreu um erro ao carregar os dados', error.message);
       });
   };
 
@@ -65,31 +57,15 @@ const Customer = () => {
   const removeCustomer = async () => {
     setLoading(true);
     await customerRequest
-      .removeCustomer(customerId, customer)
+      .remove?.(customerId, customer)
       .then(async () => {
         await loadCustomers();
         setLoading(false);
-        toast({
-          title: 'Cliente excluído com sucesso',
-          description: '',
-          status: 'success',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('success', 'Cliente excluído com sucesso', '');
       })
       .catch(error => {
         setLoading(false);
-        toast({
-          title: 'Ocorreu um erro ao carregar os dados',
-          description: error.message,
-          status: 'error',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('error', 'Ocorreu um erro ao carregar os dados', error.message);
       });
   };
   useEffect(() => {
@@ -124,7 +100,7 @@ const Customer = () => {
         <Tbody>
           {customers.map((customer: ICustomer) => {
             return (
-              <Tr key={customer.id}>
+              <Tr key={`${customer.id}`}>
                 <Td>
                   <i
                     className="bi bi-pencil-square"

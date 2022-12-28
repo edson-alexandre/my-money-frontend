@@ -1,13 +1,14 @@
+import { IAddress } from './../../interfaces/IAddress';
 import AppError from '../../errors/AppError';
 import { useRequest } from '../providers/useRequest';
 
 export const useViaCepRequest = () => {
   const path = 'cep';
-  const request = useRequest();
+  const request = useRequest<IAddress>();
 
-  const getAddresByCep = async (cep: string): Promise<any> => {
+  const getAddresByCep = async (cep: string): Promise<IAddress> => {
     return await request
-      .get({
+      .getOne({
         path: `${path}/${cep}`,
         sendAuthorization: true,
       })

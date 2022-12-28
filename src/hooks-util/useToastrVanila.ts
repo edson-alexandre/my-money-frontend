@@ -1,7 +1,7 @@
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 
-export const useToastr = (timeOut: number = 5000) => {
+export const useToastrVanila = (timeOut: number = 5000) => {
   toastr.options = {
     positionClass: 'toast-top-right',
     hideDuration: 3000,

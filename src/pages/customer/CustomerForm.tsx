@@ -1,4 +1,4 @@
-import { Box, Button, Progress, useToast, Radio, RadioGroup, Stack } from '@chakra-ui/react';
+import { Box, Button, Progress, Radio, RadioGroup, Stack } from '@chakra-ui/react';
 
 import { Input } from '../../components/my-input/Input.styled';
 
@@ -17,6 +17,7 @@ import { cpf, cnpj } from 'cpf-cnpj-validator';
 import { useViaCepRequest } from '../../hooks/services/useViaCepRequest';
 import { IAddress } from '../../interfaces/IAddress';
 import { InputMask } from '../../components/my-input/Input.styled';
+import { useToastr } from '../../hooks-util/useToastr';
 
 const initialCustomer = {
   name: '',
@@ -43,7 +44,7 @@ const CustomerForm = () => {
   const [loading, setLoading] = useState(false);
   const customerRequest = useCustomerRequests();
   const cepRequest = useViaCepRequest();
-  const toast = useToast();
+  const toastr = useToastr();
   const navigate = useNavigate();
 
   const schema = yup
@@ -113,22 +114,14 @@ const CustomerForm = () => {
       })
       .catch(error => {
         setLoading(false);
-        toast({
-          title: 'Ocorreu um erro ao obter os dados do CEP',
-          description: error.message,
-          status: 'error',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('error', 'Ocorreu um erro ao obter os dados do CEP', error.message);
       });
   };
 
   const loadCustomer = async () => {
     setLoading(true);
     await customerRequest
-      .listCustomerById(customerId)
+      .listById?.(customerId)
       .then(customer => {
         setCustomer({ ...customer });
         reset({ ...customer });
@@ -136,15 +129,7 @@ const CustomerForm = () => {
       })
       .catch(error => {
         setLoading(false);
-        toast({
-          title: 'Ocorreu um erro ao carregar os dados',
-          description: error.message,
-          status: 'error',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('error', 'Ocorreu um erro ao carregar os dados', error.message);
       });
   };
 
@@ -158,31 +143,15 @@ const CustomerForm = () => {
       };
     });
     customerRequest
-      .updateCustomer(customerId, { ...customer, zip })
+      .update?.(customerId, { ...customer, zip })
       .then(() => {
         setLoading(false);
-        toast({
-          title: 'SUCESSO',
-          description: 'Os dados foram salvos com sucesso',
-          status: 'success',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('success', 'SUCESSO', 'Os dados foram salvos com sucesso');
         navigate('/customer');
       })
       .catch(error => {
         setLoading(false);
-        toast({
-          title: 'Ocorreu um erro ao carregar os dados',
-          description: error.message,
-          status: 'error',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('error', 'Ocorreu um erro ao carregar os dados', error.message);
       });
   };
 
@@ -196,31 +165,15 @@ const CustomerForm = () => {
       };
     });
     customerRequest
-      .createCustomer({ ...customer, zip })
+      .create?.({ ...customer, zip })
       .then(() => {
         setLoading(false);
-        toast({
-          title: 'SUCESSO',
-          description: 'Os dados foram salvos com sucesso',
-          status: 'success',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('success', 'SUCESSO', 'Os dados foram salvos com sucesso');
         navigate('/customer');
       })
       .catch(error => {
         setLoading(false);
-        toast({
-          title: 'Ocorreu um erro ao carregar os dados',
-          description: error.message,
-          status: 'error',
-          variant: 'solid',
-          duration: 5000,
-          isClosable: true,
-          position: 'top-right',
-        });
+        toastr.toastr('error', 'Ocorreu um erro ao carregar os dados', error.message);
       });
   };
 

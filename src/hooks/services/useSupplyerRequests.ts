@@ -1,84 +1,84 @@
 import { ICrudRequest } from './../../interfaces/ICrudRequest';
-import { ICustomer } from './../../interfaces/ICustomer';
+import { ISupplyer } from './../../interfaces/ISupplyer';
 import AppError from '../../errors/AppError';
-import { useRequest } from '../providers/useRequest';
+import { useRequest } from './../providers/useRequest';
 
-export const useCustomerRequests = (): ICrudRequest<ICustomer> => {
-  const path = 'customers';
-  const request = useRequest<ICustomer>();
+export const useSupplyerRequests = (): ICrudRequest<ISupplyer> => {
+  const path = 'supplyers';
+  const request = useRequest<ISupplyer>();
 
-  const list = async (): Promise<ICustomer[]> => {
+  const list = async (): Promise<ISupplyer[]> => {
     return await request
       .getMany({
         path,
         sendAuthorization: true,
       })
-      .then(customers => {
-        return customers;
+      .then(supplyers => {
+        return supplyers;
       })
       .catch(error => {
         throw new AppError(error.message, error.status);
       });
   };
 
-  const listById = async (id: string): Promise<ICustomer> => {
+  const listById = async (id: string): Promise<ISupplyer> => {
     return await request
       .getOne({
         path: `${path}/${id}`,
         sendAuthorization: true,
       })
-      .then(customer => {
-        return customer;
+      .then(supplyer => {
+        return supplyer;
       })
       .catch(error => {
         throw new AppError(error.message, error.status);
       });
   };
 
-  const create = async (customer: ICustomer): Promise<ICustomer> => {
+  const create = async (supplyer: ISupplyer): Promise<ISupplyer> => {
     return await request
       .post({
         path: `${path}`,
         sendAuthorization: true,
-        body: customer,
+        body: supplyer,
       })
-      .then(customer => {
-        return customer;
+      .then(supplyer => {
+        return supplyer;
       })
       .catch(error => {
         throw new AppError(error.message, error.status);
       });
   };
 
-  const update = async (customerId: string, customer: ICustomer): Promise<ICustomer> => {
+  const update = async (id: string, supplyer: ISupplyer): Promise<ISupplyer> => {
     return await request
       .put({
-        path: `${path}/${customerId}`,
+        path: `${path}/${id}`,
         sendAuthorization: true,
-        body: customer,
+        body: supplyer,
       })
-      .then(customer => {
-        return customer;
+      .then(supplyer => {
+        return supplyer;
       })
       .catch(error => {
         throw new AppError(error.message, error.status);
       });
   };
 
-  const remove = async (customerId: string, customer: ICustomer): Promise<void> => {
+  const remove = async (id: string, supplyer: ISupplyer): Promise<void> => {
     return await request
       .remove({
-        path: `${path}/${customerId}`,
+        path: `${path}/${remove}`,
         sendAuthorization: true,
-        body: customer,
+        body: supplyer,
       })
-      .then(customer => {
-        return customer;
+      .then(supplyer => {
+        return supplyer;
       })
       .catch(error => {
         throw new AppError(error.message, error.status);
       });
   };
 
-  return { list, listById, create, update, remove };
+  return { list, listById, create, remove, update };
 };

@@ -10,6 +10,7 @@ import CustomerForm from '../pages/customer/CustomerForm';
 import Home from '../pages/Home/Home';
 import Login from '../pages/login/Login';
 import Supplier from '../pages/supplier/Supplier';
+import SupplyerForm from '../pages/supplier/SupplyerForm';
 
 const Content = () => {
   const { state } = useContext(UserContext);
@@ -34,6 +35,8 @@ const Content = () => {
             <Route path="/customer/:id/edit" element={<CustomerForm />} />
             <Route path="/customer/:id/new" element={<CustomerForm />} />
             <Route path="/supplier" element={<Supplier />} />
+            <Route path="/supplyer/:id/edit" element={<SupplyerForm />} />
+            <Route path="/supplyer/:id/new" element={<SupplyerForm />} />
             <Route path="/accounts-receivable" element={<AccountsReceivable />} />
             <Route path="/accounts-payable" element={<AccountsPayable />} />
             <Route path="*" element={<Navigate to="/home" />} />
