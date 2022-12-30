@@ -1,4 +1,4 @@
-import { Box, Button, Progress, Radio, RadioGroup, Stack } from '@chakra-ui/react';
+import { Button, Radio, RadioGroup, Stack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle/PageTitle';
@@ -9,7 +9,6 @@ import { ISupplyer } from '../../interfaces/ISupplyer';
 
 import { Col, Row } from 'react-bootstrap';
 import { Input, InputMask } from '../../components/my-input/Input.styled';
-import { ErrorMessage } from '../../components/my-input/ErrorMessage.styled';
 import { useSupplyerRequests } from '../../hooks/services/useSupplyerRequests';
 import { useToastr } from '../../hooks-util/useToastr';
 import IFormError from '../../interfaces/IFormError';
@@ -30,8 +29,6 @@ const initialSupplyer = {
   zip: '',
   country: '',
 };
-
-interface Dic {}
 
 const SupplyerForm = () => {
   const path = useLocation();
@@ -95,11 +92,11 @@ const SupplyerForm = () => {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const errors = await validation.validate(schema, supplyer).then(result => {
+    const result = await validation.validate(schema, supplyer).then(result => {
       return result;
     });
-    if (errors) {
-      setErrors(errors);
+    if (!result.isValid) {
+      setErrors(result.errors);
     } else {
       setErrors(null);
     }
@@ -134,22 +131,29 @@ const SupplyerForm = () => {
             </RadioGroup>
           </Col>
           <Col cols={12} md={12}>
-            <label style={{ marginTop: '10px' }}>Nome do cliente</label>
+            <InputMask
+              mask="00.000.000/0000-00"
+              label="CNPJ / CPF do Fornecedor"
+              isLoading={loading}
+              isError={Boolean(errors?.cgcCpf)}
+              errorMessage={errors?.cgcCpf}
+              placeholder="Informe CNPJ / CPF nome do fornecedor"
+              p={5}
+              value={supplyer.cgcCpf}
+              onAccept={value => setSupplyer({ ...supplyer, cgcCpf: `${value}` })}
+            />
+          </Col>
+          <Col cols={12} md={12}>
             <Input
+              label="Nome do Fornecedor"
+              isLoading={loading}
+              isError={Boolean(errors?.name)}
+              errorMessage={errors?.name}
               placeholder="Informe o nome do fornecedor"
               p={5}
               value={supplyer.name}
-              onChange={e => {
-                setSupplyer(state => {
-                  return {
-                    ...state,
-                    name: e.target.value,
-                  };
-                });
-              }}
+              onChange={e => setSupplyer({ ...supplyer, name: e.target.value })}
             />
-            {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-            {Boolean(errors?.name) ? <ErrorMessage>{errors?.name}</ErrorMessage> : null}
           </Col>
         </Row>
         <div>

@@ -1,3 +1,4 @@
+import { IPaginationReturn } from './../../interfaces/IPaginationReturn';
 import { ICrudRequest } from './../../interfaces/ICrudRequest';
 import { ICustomer } from './../../interfaces/ICustomer';
 import AppError from '../../errors/AppError';
@@ -7,14 +8,14 @@ export const useCustomerRequests = (): ICrudRequest<ICustomer> => {
   const path = 'customers';
   const request = useRequest<ICustomer>();
 
-  const list = async (): Promise<ICustomer[]> => {
+  const list = async (currentPage: number, perPage: number): Promise<IPaginationReturn<ICustomer[]>> => {
     return await request
-      .getMany({
-        path,
+      .getManyPaginated({
+        path: `${path}?page=${currentPage}&perPage=${perPage}`,
         sendAuthorization: true,
       })
-      .then(customers => {
-        return customers;
+      .then(result => {
+        return result;
       })
       .catch(error => {
         throw new AppError(error.message, error.status);

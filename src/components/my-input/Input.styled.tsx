@@ -3,7 +3,9 @@ import styled from 'styled-components';
 
 import { AnyMaskedOptions, MaskElement } from 'imask';
 import { IMaskInputProps } from 'react-imask/dist/mixin';
-import { ComponentType } from 'react';
+import { ComponentType, forwardRef } from 'react';
+import { Progress } from '@chakra-ui/react';
+import { ErrorMessage } from './ErrorMessage.styled';
 
 type IMaskProps = IMaskInputProps<
   AnyMaskedOptions,
@@ -37,7 +39,7 @@ type InputProps = {
   placeholder?: string;
 };
 
-const Input = styled.input`
+const StyledInput = styled.input`
   padding-top: ${(props: InputProps) => props.pt || props.py || 0}px;
   padding-bottom: ${(props: InputProps) => props.pb || props.py || 0}px;
   padding-right: ${(props: InputProps) => props.pr || props.px || 0}px;
@@ -58,7 +60,20 @@ const Input = styled.input`
   }
 `;
 
+const Input = forwardRef<any, InputProps>((props: InputProps, ref) => {
+  return (
+    <>
+      <label style={{ marginTop: '10px' }}>{props.label}</label>
+      <StyledInput {...props} ref={ref} className="input" />
+      {props.isLoading && <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} />}
+      {props.isError && <ErrorMessage>{props.errorMessage}</ErrorMessage>}
+    </>
+  );
+});
+
 const InputMask: ComponentType<IMaskProps & InputProps> = IMaskMixin(({ inputRef, ...props }) => (
-  <Input {...(props as any)} ref={inputRef} />
+  <>
+    <Input {...(props as any)} ref={inputRef} />
+  </>
 ));
 export { InputMask, Input };

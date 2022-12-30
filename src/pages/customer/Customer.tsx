@@ -1,8 +1,23 @@
-import { Button, Progress, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Progress,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CustomAlertDialog } from '../../components/AlertDialog/CustomAlertDialog';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import { Pagination } from '../../components/pagination/Pagination';
 import { useToastr } from '../../hooks-util/useToastr';
 import { useCustomerRequests } from '../../hooks/services/useCustomerRequests';
 import { ICustomAlertRef } from '../../interfaces/ICustomAlertRef';
@@ -26,6 +41,9 @@ const initialCustomer = {
 
 const Customer = () => {
   const [customers, setCustomers] = useState<ICustomer[]>([{ ...initialCustomer }]);
+  const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(5);
   const [customerId, setCustomerId] = useState<string>('');
   const [customer, setCustomer] = useState<ICustomer>({ ...initialCustomer });
   const [loading, setLoading] = useState(false);
@@ -37,10 +55,11 @@ const Customer = () => {
   const loadCustomers = async () => {
     setLoading(true);
     await customerRequest
-      .list?.()
-      .then(customers => {
+      .list?.(currentPage, perPage)
+      .then(result => {
         setLoading(false);
-        setCustomers(customers);
+        setCustomers(result.data);
+        setTotalRecords(result.total);
       })
       .catch(error => {
         setLoading(false);
@@ -70,7 +89,15 @@ const Customer = () => {
   };
   useEffect(() => {
     loadCustomers();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentPage, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleChangeCurrent = (current: number) => {
+    setCurrentPage(current);
+  };
+
+  const handleChangePerpage = (current: number) => {
+    setPerPage(current);
+  };
 
   return (
     <div className="p-2">
@@ -123,6 +150,13 @@ const Customer = () => {
           })}
         </Tbody>
       </Table>
+      <Pagination
+        current={currentPage}
+        defaultPerPage={5}
+        total={totalRecords}
+        setCurrent={handleChangeCurrent}
+        getPerPage={handleChangePerpage}
+      />
     </div>
   );
 };

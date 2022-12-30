@@ -1,23 +1,20 @@
 import { Box, Button, Progress, Radio, RadioGroup, Stack } from '@chakra-ui/react';
-
 import { Input } from '../../components/my-input/Input.styled';
-
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import { useCustomerRequests } from '../../hooks/services/useCustomerRequests';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { TestContext } from 'yup';
 import { ICustomer } from '../../interfaces/ICustomer';
-import { ErrorMessage } from '../../components/my-input/ErrorMessage.styled';
 import { Row, Col } from 'react-bootstrap';
 import { cpf, cnpj } from 'cpf-cnpj-validator';
 import { useViaCepRequest } from '../../hooks/services/useViaCepRequest';
 import { IAddress } from '../../interfaces/IAddress';
 import { InputMask } from '../../components/my-input/Input.styled';
 import { useToastr } from '../../hooks-util/useToastr';
+import IFormError from '../../interfaces/IFormError';
+import { useValidateSchema } from '../../hooks/providers/useValidateSchema';
 
 const initialCustomer = {
   name: '',
@@ -40,6 +37,8 @@ const CustomerForm = () => {
   const path = useLocation();
   const [action] = useState(path.pathname.split('/').indexOf('new') === -1 ? 'edit' : 'new');
   const [customerId] = useState(params.id || '');
+  const validation = useValidateSchema();
+  const [errors, setErrors] = useState<IFormError | null>(null);
   const [customer, setCustomer] = useState<ICustomer>(initialCustomer);
   const [loading, setLoading] = useState(false);
   const customerRequest = useCustomerRequests();
@@ -74,16 +73,6 @@ const CustomerForm = () => {
     })
     .required();
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    formState: { errors },
-  } = useForm<ICustomer>({
-    resolver: yupResolver(schema),
-  });
-
   const getAddress = async (zip: string) => {
     setLoading(true);
     const cep = `${zip}`.replaceAll('-', '').replaceAll('.', '');
@@ -102,15 +91,6 @@ const CustomerForm = () => {
             country: 'Brasil',
           };
         });
-        reset({
-          ...customer,
-          city: address.localidade,
-          state: address.uf,
-          street: address.logradouro,
-          details: address.complemento,
-          district: address.bairro,
-          country: 'Brasil',
-        });
       })
       .catch(error => {
         setLoading(false);
@@ -124,7 +104,6 @@ const CustomerForm = () => {
       .listById?.(customerId)
       .then(customer => {
         setCustomer({ ...customer });
-        reset({ ...customer });
         setLoading(false);
       })
       .catch(error => {
@@ -183,7 +162,18 @@ const CustomerForm = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const submitForm = async (data: ICustomer) => {
+  const submitForm = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    const result = await validation.validate(schema, customer).then(result => {
+      return result;
+    });
+    if (!result.isValid) {
+      setErrors(result.errors);
+      return;
+    } else {
+      setErrors(null);
+    }
+
     if (customerId === '0') {
       await createCustomer();
     } else {
@@ -200,7 +190,7 @@ const CustomerForm = () => {
       </PageTitle>
       {!loading || <Progress size="xs" isIndeterminate />}
       <form
-        onSubmit={handleSubmit(submitForm)}
+        onSubmit={e => submitForm(e)}
         style={{ display: 'flex', flexDirection: 'column', padding: '0px 40px 0px 40px' }}
       >
         <Row columns={[1]}>
@@ -222,75 +212,42 @@ const CustomerForm = () => {
             </RadioGroup>
           </Col>
           <Col cols={12} md={12}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>{`${customer.personType === 'FISICA' ? 'CPF' : 'CNPJ'} `}</label>
-              <Controller
-                control={control}
-                name="cgcCpf"
-                render={({ field: { onChange, value } }) => {
-                  return (
-                    <InputMask
-                      placeholder="Informe o CNPJ / CPF do cliente"
-                      mask={`${customer.personType === 'FISICA' ? '000.000.000-00' : '00.000.000/0000-00'} `}
-                      onAccept={value => {
-                        onChange(value);
-                        setCustomer(state => {
-                          return {
-                            ...state,
-                            cgcCpf: value,
-                          };
-                        });
-                      }}
-                      value={customer.cgcCpf}
-                      p={5}
-                    />
-                  );
-                }}
-              />
-
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.cgcCpf?.message) ? <ErrorMessage>{errors?.cgcCpf?.message} </ErrorMessage> : null}
-            </Box>
+            <InputMask
+              label={`${customer.personType === 'FISICA' ? 'CPF' : 'CNPJ'} `}
+              mask={`${customer.personType === 'FISICA' ? '000.000.000-00' : '00.000.000/0000-00'} `}
+              placeholder="Informe o CNPJ / CPF do cliente"
+              onAccept={value => setCustomer({ ...customer, cgcCpf: value })}
+              value={`${customer.cgcCpf}`}
+              isLoading={loading}
+              isError={Boolean(errors?.cgcCpf)}
+              errorMessage={`${errors?.cgcCpf}`}
+              p={5}
+            />
+          </Col>
+          <Col cols={12} md={12}>
+            <Input
+              label="Nome do cliente"
+              placeholder="Informe o nome do cliente"
+              p={5}
+              value={`${customer.name}`}
+              onChange={e => setCustomer({ ...customer, name: e.target.value })}
+              isError={Boolean(errors?.name)}
+              errorMessage={`${errors?.name}`}
+              isLoading={loading}
+            />
           </Col>
           <Col cols={12} md={12}>
             <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>Nome do cliente</label>
               <Input
-                {...register('name')}
-                type="text"
-                placeholder="Informe o nome do cliente"
-                p={5}
-                value={`${customer.name}`}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, name: e.target.value };
-                  })
-                }
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.name?.message) ? <ErrorMessage>{errors?.name?.message} </ErrorMessage> : null}
-            </Box>
-          </Col>
-          <Col cols={12} md={12}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>E-mail do cliente</label>
-              <Input
-                {...register('email')}
-                type="text"
+                label="E-mail do cliente"
                 placeholder="Informe o e-mail do cliente"
                 p={5}
-                value={customer.email}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, email: e.target.value };
-                  })
-                }
+                value={`${customer.email}`}
+                onChange={e => setCustomer({ ...customer, email: e.target.value })}
+                isError={Boolean(errors?.email)}
+                errorMessage={`${errors?.email}`}
+                isLoading={loading}
               />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.email?.message) ? <ErrorMessage>{errors?.email?.message} </ErrorMessage> : null}
             </Box>
           </Col>
 
@@ -298,194 +255,116 @@ const CustomerForm = () => {
             <Box className="mt-2">
               <label style={{ marginTop: '10px' }}>Contato do Cliente</label>
               <Input
-                type="text"
+                label="Contato do Cliente"
                 placeholder="Informe o contato do cliente"
-                value={customer.contact}
-                onChange={e =>
-                  setCustomer(state => {
-                    return {
-                      ...state,
-                      contact: e.target.value,
-                    };
-                  })
-                }
+                value={`${customer.contact || ''}`}
+                onChange={e => setCustomer({ ...customer, contact: e.target.value })}
+                isLoading={loading}
                 p={5}
               />
             </Box>
           </Col>
 
           <Col cols={12} md={12}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>{`CEP `}</label>
-              <Controller
-                control={control}
-                name="zip"
-                render={({ field: { onChange, value } }) => {
-                  return (
-                    <InputMask
-                      placeholder="Informe o CEP"
-                      mask={`00000-000`}
-                      onAccept={async currentValue => {
-                        onChange(currentValue);
-                        setCustomer(state => {
-                          return { ...state, zip: currentValue };
-                        });
-                      }}
-                      value={`${customer.zip}`}
-                      onBlur={async e => await getAddress(e.target.value)}
-                      p={5}
-                    />
-                  );
-                }}
-              />
-
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.zip?.message) ? <ErrorMessage>{errors?.zip?.message} </ErrorMessage> : null}
-            </Box>
+            <InputMask
+              label="CEP"
+              placeholder="Informe o CEP"
+              mask={`00000-000`}
+              onAccept={value => setCustomer({ ...customer, zip: value })}
+              value={`${customer.zip}`}
+              onBlur={async e => await getAddress(e.target.value)}
+              isLoading={loading}
+              isError={Boolean(errors?.zip)}
+              p={5}
+            />
           </Col>
 
           <Col cols={12} md={8}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>Logradouro</label>
-              <Input
-                {...register('street')}
-                type="text"
-                placeholder="Informe o logradouro"
-                value={customer.street}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, street: e.target.value };
-                  })
-                }
-                p={5}
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.street?.message) ? <ErrorMessage>{errors?.street?.message} </ErrorMessage> : null}
-            </Box>
+            <Input
+              label="Logradouro"
+              placeholder="Informe o logradouro"
+              value={`${customer.street}`}
+              onChange={e => setCustomer({ ...customer, street: e.target.value })}
+              p={5}
+              isError={Boolean(errors?.street)}
+              errorMessage={`${errors?.street}`}
+              isLoading={loading}
+            />
           </Col>
           <Col cols={12} md={4}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>Número</label>
-              <Input
-                {...register('number')}
-                type="text"
-                placeholder="Informe o Número"
-                value={customer.number}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, number: e.target.value };
-                  })
-                }
-                p={5}
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.number?.message) ? <ErrorMessage>{errors?.number?.message} </ErrorMessage> : null}
-            </Box>
+            <label style={{ marginTop: '10px' }}>Número</label>
+            <Input
+              label="Número do Endereço"
+              placeholder="Informe o Número do endereço"
+              value={`${customer.number}`}
+              isError={Boolean(errors?.number)}
+              errorMessage={`${errors?.number}`}
+              isLoading={loading}
+              onChange={e => setCustomer({ ...customer, number: e.target.value })}
+              p={5}
+            />
           </Col>
           <Col cols={12} md={6}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>Bairro</label>
-              <Input
-                {...register('district')}
-                type="text"
-                placeholder="Informe o bairro"
-                value={customer.district}
-                onChange={e =>
-                  setCustomer(state => {
-                    return {
-                      ...state,
-                      district: e.target.value,
-                    };
-                  })
-                }
-                p={5}
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.district?.message) ? <ErrorMessage>{errors?.district?.message} </ErrorMessage> : null}
-            </Box>
+            <Input
+              label="Bairro"
+              placeholder="Informe o bairro"
+              isLoading={loading}
+              isError={Boolean(errors?.district)}
+              errorMessage={`${errors?.district}`}
+              value={customer.district}
+              onChange={e => setCustomer({ ...customer, district: e.target.value })}
+              p={5}
+            />
           </Col>
           <Col cols={12} md={6}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>Complemento</label>
-              <Input
-                type="text"
-                placeholder="Informe o complemento"
-                value={customer.details}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, details: e.target.value };
-                  })
-                }
-                p={5}
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.details?.message) ? <ErrorMessage>{errors?.details?.message} </ErrorMessage> : null}
-            </Box>
+            <label style={{ marginTop: '10px' }}>Complemento</label>
+            <Input
+              label="Complemento"
+              placeholder="Informe o complemento"
+              value={`${customer.details}`}
+              isLoading={loading}
+              isError={Boolean(errors?.details)}
+              errorMessage={`${errors?.details}`}
+              onChange={e => setCustomer({ ...customer, details: e.target.value })}
+              p={5}
+            />
           </Col>
           <Col cols={12} md={4}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>Cidade</label>
-              <Input
-                {...register('city')}
-                type="text"
-                placeholder="Informe o cidade"
-                value={customer.city}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, city: e.target.value };
-                  })
-                }
-                p={5}
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.city?.message) ? <ErrorMessage>{errors?.city?.message} </ErrorMessage> : null}
-            </Box>
+            <Input
+              label="Cidade"
+              placeholder="Informe o cidade"
+              value={`${customer.city}`}
+              isLoading={loading}
+              isError={Boolean(errors?.city)}
+              errorMessage={`${errors?.city}`}
+              onChange={e => setCustomer({ ...customer, city: e.target.value })}
+              p={5}
+            />
           </Col>
           <Col cols={12} md={4}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>Estado</label>
-              <Input
-                {...register('state')}
-                type="text"
-                placeholder="Informe o estado"
-                value={customer.state}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, state: e.target.value };
-                  })
-                }
-                p={5}
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.state?.message) ? <ErrorMessage>{errors?.state?.message} </ErrorMessage> : null}
-            </Box>
+            <Input
+              label="Estado"
+              placeholder="Informe o estado"
+              value={`${customer.state}`}
+              isLoading={loading}
+              isError={Boolean(errors?.state)}
+              errorMessage={`${errors?.state}`}
+              onChange={e => setCustomer({ ...customer, state: e.target.value })}
+              p={5}
+            />
           </Col>
           <Col cols={12} md={4}>
-            <Box className="mt-2">
-              <label style={{ marginTop: '10px' }}>País</label>
-              <Input
-                {...register('country')}
-                type="text"
-                placeholder="Informe o país"
-                value={customer.country}
-                onChange={e =>
-                  setCustomer(state => {
-                    return { ...state, country: e.target.value };
-                  })
-                }
-                p={5}
-              />
-              {loading ? <Progress size="xs" isIndeterminate style={{ marginTop: '-1px' }} /> : null}
-
-              {Boolean(errors?.country?.message) ? <ErrorMessage>{errors?.country?.message} </ErrorMessage> : null}
-            </Box>
+            <label style={{ marginTop: '10px' }}>País</label>
+            <Input
+              label="País"
+              placeholder="Informe o país"
+              isLoading={loading}
+              isError={Boolean(errors?.country)}
+              errorMessage={`${errors?.country}`}
+              value={customer.country}
+              onChange={e => setCustomer({ ...customer, country: e.target.value })}
+              p={5}
+            />
           </Col>
         </Row>
 

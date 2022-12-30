@@ -1,3 +1,4 @@
+import { IPaginationReturn } from './../../interfaces/IPaginationReturn';
 import axios, { AxiosRequestHeaders } from 'axios';
 import { useState, useContext } from 'react';
 import UserContext from '../../context/user/UserContext';
@@ -15,6 +16,7 @@ interface IRequest<T> {
   put(request: IRequestParams<T>): Promise<T>;
   getOne(request: IRequestParams<T>): Promise<T>;
   getMany(request: IRequestParams<T>): Promise<T[]>;
+  getManyPaginated(request: IRequestParams<T>): Promise<IPaginationReturn<T[]>>;
   remove(request: IRequestParams<T>): Promise<void>;
 }
 
@@ -150,5 +152,30 @@ export const useRequest = <T>(): IRequest<T> => {
       });
   };
 
-  return { post, getOne, getMany, put, remove };
+  const getManyPaginated = async (request: IRequestParams<T>): Promise<IPaginationReturn<T[]>> => {
+    const headers = { ...request.headers };
+    if (request.sendAuthorization) {
+      headers.Authorization = `Bearer ${userState.token}`;
+    }
+    return await axios({
+      url: `${baseUrl}/${request.path}`,
+      method: 'GET',
+      headers,
+    })
+      .then(res => {
+        return res.data;
+      })
+      .catch(error => {
+        throw new AppError(
+          error?.response?.data?.validation?.params?.message ||
+            error?.response?.data?.validation?.body?.message ||
+            error?.response?.data?.validation?.query?.message ||
+            error?.response?.data?.message ||
+            'Ocorreu um erro ao executar o procedimento',
+          error?.response.status || 400,
+        );
+      });
+  };
+
+  return { post, getOne, getMany, put, remove, getManyPaginated };
 };

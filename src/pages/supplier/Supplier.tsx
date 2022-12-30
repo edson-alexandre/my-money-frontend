@@ -30,9 +30,9 @@ const Supplier = () => {
   const listSupplyers = async () => {
     setLoading(true);
     await supplyerRequest
-      .list?.()
-      .then(async data => {
-        await setSupplyers([...data]);
+      .list?.(5, 5)
+      .then(async result => {
+        await setSupplyers([...result.data]);
         setLoading(false);
       })
       .catch(error => {

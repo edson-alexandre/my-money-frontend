@@ -1,3 +1,4 @@
+import { IPaginationReturn } from './../../interfaces/IPaginationReturn';
 import { ICrudRequest } from './../../interfaces/ICrudRequest';
 import { ISupplyer } from './../../interfaces/ISupplyer';
 import AppError from '../../errors/AppError';
@@ -7,9 +8,9 @@ export const useSupplyerRequests = (): ICrudRequest<ISupplyer> => {
   const path = 'supplyers';
   const request = useRequest<ISupplyer>();
 
-  const list = async (): Promise<ISupplyer[]> => {
+  const list = async (currentPage: number, perPage: number): Promise<IPaginationReturn<ISupplyer[]>> => {
     return await request
-      .getMany({
+      .getManyPaginated({
         path,
         sendAuthorization: true,
       })
