@@ -6,9 +6,13 @@ interface IPaginationProps {
   current: number;
   total: number;
   defaultPerPage: number;
-  setCurrent(current: number): void;
+  getCurrentPage(current: number): void;
   getPerPage(perPage: number): void;
 }
+
+const Icon = styled.i`
+  margin-left: 10px;
+`;
 
 const Start = styled.span`
   margin-left: 20px;
@@ -36,19 +40,21 @@ const Pagination = (props: IPaginationProps) => {
 
   const increment = () => {
     const page = perPage * (props.current + 1) - perPage + 1 > props.total ? props.current : props.current + 1;
-    props.setCurrent(page);
+    props.getCurrentPage(page);
   };
 
   const decrement = () => {
     const page = props.current === 1 ? props.current : props.current - 1;
-    props.setCurrent(page);
+    props.getCurrentPage(page);
   };
 
   const perPageChanged = (perPageLocal: number) => {
     setPerPage(perPageLocal);
     props.getPerPage(perPageLocal);
-    props.setCurrent(1);
+    props.getCurrentPage(1);
   };
+
+  const perPageOptions = [5, 10, 20, 9999];
 
   return (
     <Box display="flex" justifyContent="flex-end" marginTop={5} marginRight={5}>
@@ -56,14 +62,15 @@ const Pagination = (props: IPaginationProps) => {
         {({ isOpen }) => (
           <>
             <span style={{ marginRight: 20 }}>Linhas por página</span>
-            <MenuButton>
-              {perPage === 9999 ? 'Todas' : perPage} {<i className={`bi bi-caret-${isOpen ? 'up' : 'down'}-fill`} />}
+            <MenuButton paddingLeft={5} paddingRight={5}>
+              {perPage === 9999 ? 'Todas' : perPage} {<Icon className={`bi bi-caret-${isOpen ? 'up' : 'down'}-fill`} />}
             </MenuButton>
             <MenuList>
-              <MenuItem onClick={() => perPageChanged(5)}>5</MenuItem>
-              <MenuItem onClick={() => perPageChanged(10)}>10</MenuItem>
-              <MenuItem onClick={() => perPageChanged(20)}>20</MenuItem>
-              <MenuItem onClick={() => perPageChanged(9999)}>Todas</MenuItem>
+              {perPageOptions.map(option => (
+                <MenuItem onClick={() => perPageChanged(option)} key={option}>
+                  {option === 9999 ? 'Todas' : option}
+                </MenuItem>
+              ))}
             </MenuList>
           </>
         )}

@@ -1,0 +1,7 @@
+.dark-table-row:hover {
+    background-color: #3d3d3d;
+}
+
+.light-table-row:hover {
+    background-color: #afafaf;
+}

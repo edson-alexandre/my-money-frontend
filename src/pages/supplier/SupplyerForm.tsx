@@ -13,6 +13,8 @@ import { useSupplyerRequests } from '../../hooks/services/useSupplyerRequests';
 import { useToastr } from '../../hooks-util/useToastr';
 import IFormError from '../../interfaces/IFormError';
 import { useValidateSchema } from '../../hooks/providers/useValidateSchema';
+import { useViaCepRequest } from '../../hooks/services/useViaCepRequest';
+import { IAddress } from '../../interfaces/IAddress';
 
 const initialSupplyer = {
   name: '',
@@ -42,11 +44,12 @@ const SupplyerForm = () => {
   const [supplyerId] = useState(params.id || '');
   const navigate = useNavigate();
   const supplyerRequest = useSupplyerRequests();
+  const cepRequest = useViaCepRequest();
 
   const schema = yup
     .object({
-      name: yup.string().required('É necessário informar o nome'),
-      email: yup.string().required('Campo obrigatório').email('Favor informar um e-mail válido'),
+      name: yup.string().required('Nome não informado'),
+      email: yup.string().required('E-mail não informado').email('Favor informar um e-mail válido'),
       cgcCpf: yup
         .string()
         .required('CNPJ / CPF Não informado')
@@ -60,13 +63,13 @@ const SupplyerForm = () => {
             return true;
           }
         }),
-      zip: yup.string().required('Campo obrigatório'),
-      street: yup.string().required('Campo obrigatório'),
-      number: yup.string().required('Campo obrigatório'),
-      city: yup.string().required('Campo obrigatório'),
-      state: yup.string().required('Campo obrigatório'),
-      district: yup.string().required('Campo obrigatório'),
-      country: yup.string().required('Campo obrigatório'),
+      zip: yup.string().required('CEP não informado'),
+      street: yup.string().required('Rua não informada'),
+      number: yup.string().required('Número do endereço não informado'),
+      city: yup.string().required('Cidade não informada'),
+      state: yup.string().required('Estado não informado'),
+      district: yup.string().required('Bairro não informado'),
+      country: yup.string().required('País não informado'),
     })
     .required();
 
@@ -84,11 +87,79 @@ const SupplyerForm = () => {
       });
   };
 
+  const getAddress = async (zip: string) => {
+    setLoading(true);
+    const cep = `${zip}`.replaceAll('-', '').replaceAll('.', '');
+    await cepRequest
+      .getAddresByCep(cep)
+      .then((address: IAddress) => {
+        setLoading(false);
+        setSupplyer(state => {
+          return {
+            ...state,
+            city: address.localidade,
+            state: address.uf,
+            street: address.logradouro,
+            details: address.complemento,
+            district: address.bairro,
+            country: 'Brasil',
+          };
+        });
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+
+  const create = async () => {
+    setLoading(true);
+    const zip = `${supplyer?.zip}`.replaceAll('-', '');
+    await setSupplyer(state => {
+      return {
+        ...state,
+        zip,
+      };
+    });
+    await supplyerRequest
+      .create?.({ ...supplyer, zip })
+      .then(() => {
+        setLoading(false);
+        toastr.toastr('success', 'SUCESSO', 'Fornecedor cadastrado com sucesso!');
+        navigate('/supplier');
+      })
+      .catch(error => {
+        setLoading(false);
+        toastr.toastr('error', 'ERRO', error.message);
+      });
+  };
+
+  const update = async () => {
+    setLoading(true);
+    const zip = `${supplyer?.zip}`.replaceAll('-', '');
+    await setSupplyer(state => {
+      return {
+        ...state,
+        zip,
+      };
+    });
+    await supplyerRequest
+      .update?.(`${supplyer?.id}`, { ...supplyer, zip })
+      .then(() => {
+        setLoading(false);
+        toastr.toastr('success', 'SUCESSO', 'Fornecedor alterado com sucesso!');
+        navigate('/supplier');
+      })
+      .catch(error => {
+        setLoading(false);
+        toastr.toastr('error', 'ERRO', error.message);
+      });
+  };
+
   useEffect(() => {
     if (supplyerId !== '0') {
       loadSupplyer();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -97,13 +168,19 @@ const SupplyerForm = () => {
     });
     if (!result.isValid) {
       setErrors(result.errors);
+      return;
+    }
+
+    setErrors(null);
+    if (action === 'new') {
+      await create();
     } else {
-      setErrors(null);
+      await update();
     }
   };
   return (
     <div className="p-2">
-      <PageTitle title="CADASTRO DE FORNECEDOR">
+      <PageTitle title={`${action === 'new' ? 'INCLSUÃO' : 'ALTERAÇÃO'} DE FORNECEDOR`}>
         <Button variant="outline" onClick={() => navigate('/supplier')}>
           Voltar
         </Button>
@@ -117,7 +194,7 @@ const SupplyerForm = () => {
             <label style={{ marginTop: '10px' }}>Tipo de Pessoa</label>
             <RadioGroup
               size="md"
-              value={supplyer.personType}
+              value={`${supplyer.personType}`}
               onChange={personType =>
                 setSupplyer(state => {
                   return { ...state, personType };
@@ -139,7 +216,7 @@ const SupplyerForm = () => {
               errorMessage={errors?.cgcCpf}
               placeholder="Informe CNPJ / CPF nome do fornecedor"
               p={5}
-              value={supplyer.cgcCpf}
+              value={`${supplyer.cgcCpf}`}
               onAccept={value => setSupplyer({ ...supplyer, cgcCpf: `${value}` })}
             />
           </Col>
@@ -151,8 +228,126 @@ const SupplyerForm = () => {
               errorMessage={errors?.name}
               placeholder="Informe o nome do fornecedor"
               p={5}
-              value={supplyer.name}
+              value={`${supplyer.name}`}
               onChange={e => setSupplyer({ ...supplyer, name: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={12}>
+            <Input
+              label="E-mail do Fornecedor"
+              placeholder="Informe o e-mail do fornecedor"
+              isLoading={loading}
+              isError={Boolean(errors?.email)}
+              errorMessage={errors?.email}
+              p={5}
+              value={`${supplyer.email}`}
+              onChange={e => setSupplyer({ ...supplyer, email: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={12}>
+            <Input
+              label="Contado do Fornecedor"
+              placeholder="Informe o contato do fornecedor"
+              isLoading={loading}
+              p={5}
+              value={`${supplyer.contact || ''}`}
+              onChange={e => setSupplyer({ ...supplyer, contact: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={12}>
+            <InputMask
+              mask="00000-000"
+              label="CEP do Forneceor"
+              placeholder="Informe o CEP do fornecedor"
+              isLoading={loading}
+              isError={Boolean(errors?.zip)}
+              errorMessage={errors?.zip}
+              p={5}
+              value={`${supplyer.zip}`}
+              onAccept={value => setSupplyer({ ...supplyer, zip: value })}
+              onBlur={async e => await getAddress(e.target.value)}
+            />
+          </Col>
+          <Col cols={12} md={8}>
+            <Input
+              label="Logradouro"
+              placeholder="Informe o logradouro"
+              isLoading={loading}
+              isError={Boolean(errors?.street)}
+              errorMessage={errors?.street}
+              p={5}
+              value={`${supplyer.street}`}
+              onChange={e => setSupplyer({ ...supplyer, street: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={4}>
+            <Input
+              label="Número do Endereço"
+              placeholder="Informe o número do endereço"
+              isLoading={loading}
+              isError={Boolean(errors?.number)}
+              errorMessage={errors?.number}
+              p={5}
+              value={`${supplyer.number}`}
+              onChange={e => setSupplyer({ ...supplyer, number: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={6}>
+            <Input
+              label="Bairro"
+              placeholder="Informe o bairro"
+              isLoading={loading}
+              isError={Boolean(errors?.district)}
+              errorMessage={errors?.district}
+              p={5}
+              value={`${supplyer.district}`}
+              onChange={e => setSupplyer({ ...supplyer, district: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={6}>
+            <Input
+              label="Complemento do Endereço"
+              placeholder="Informe o complemento"
+              isLoading={loading}
+              p={5}
+              value={`${supplyer.details}`}
+              onChange={e => setSupplyer({ ...supplyer, details: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={4}>
+            <Input
+              label="Cidade"
+              placeholder="Informe a cidade"
+              isError={Boolean(errors?.city)}
+              errorMessage={errors?.city}
+              isLoading={loading}
+              p={5}
+              value={`${supplyer.city}`}
+              onChange={e => setSupplyer({ ...supplyer, city: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={4}>
+            <Input
+              label="Estado"
+              placeholder="Informe o estado"
+              isError={Boolean(errors?.state)}
+              errorMessage={errors?.state}
+              isLoading={loading}
+              p={5}
+              value={`${supplyer.state}`}
+              onChange={e => setSupplyer({ ...supplyer, state: e.target.value })}
+            />
+          </Col>
+          <Col cols={12} md={4}>
+            <Input
+              label="País"
+              placeholder="Informe o país"
+              isError={Boolean(errors?.country)}
+              errorMessage={errors?.country}
+              isLoading={loading}
+              p={5}
+              value={`${supplyer.country}`}
+              onChange={e => setSupplyer({ ...supplyer, country: e.target.value })}
             />
           </Col>
         </Row>

@@ -1,18 +1,4 @@
-import {
-  Box,
-  Button,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Progress,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react';
+import { Button, Progress, Table, Tbody, Td, Th, Thead, Tr, useColorModeValue } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CustomAlertDialog } from '../../components/AlertDialog/CustomAlertDialog';
@@ -22,6 +8,7 @@ import { useToastr } from '../../hooks-util/useToastr';
 import { useCustomerRequests } from '../../hooks/services/useCustomerRequests';
 import { ICustomAlertRef } from '../../interfaces/ICustomAlertRef';
 import { ICustomer } from '../../interfaces/ICustomer';
+import './Customer.css';
 
 const initialCustomer = {
   name: '',
@@ -39,7 +26,17 @@ const initialCustomer = {
   country: '',
 };
 
+interface IOrder {
+  order: Boolean;
+  field: string;
+}
+
 const Customer = () => {
+  const [orderCustomers, setOrderCustomers] = useState<IOrder>({
+    order: false,
+    field: '',
+  });
+  const colorMode = useColorModeValue('light', 'dark');
   const [customers, setCustomers] = useState<ICustomer[]>([{ ...initialCustomer }]);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -99,6 +96,37 @@ const Customer = () => {
     setPerPage(current);
   };
 
+  useEffect(() => {
+    setCustomers(state => {
+      return [
+        ...state.sort((a: ICustomer, b: ICustomer) => {
+          if (a[`${orderCustomers.field}`] > b[`${orderCustomers.field}`]) {
+            return orderCustomers.order ? -1 : 1;
+          } else {
+            return orderCustomers.order ? 1 : -1;
+          }
+        }),
+      ];
+    });
+  }, [orderCustomers]);
+
+  const getOrderIcon = (name: string) => {
+    return (
+      <i
+        style={{ marginLeft: '10px' }}
+        className={`bi bi-arrow-${name === orderCustomers.field && orderCustomers.order ? 'up' : 'down'}-short`}
+      ></i>
+    );
+  };
+
+  const orderTable = (event: React.MouseEvent<HTMLElement>) => {
+    setOrderCustomers({
+      ...orderCustomers,
+      order: !orderCustomers.order,
+      field: event?.currentTarget.id,
+    });
+  };
+
   return (
     <div className="p-2">
       <PageTitle title="CADASTRO DE CLIENTES" />
@@ -106,7 +134,6 @@ const Customer = () => {
       <Button className="my-4" colorScheme="blue" onClick={() => navigate(`/customer/0/new`)}>
         Novo Cliente
       </Button>
-
       <CustomAlertDialog
         confirm={() => removeCustomer()}
         ref={alertRef}
@@ -117,17 +144,32 @@ const Customer = () => {
         <Thead>
           <Tr>
             <Th>Ações</Th>
-            <Th>Nome</Th>
-            <Th>Email</Th>
-            <Th>CNPJ / CPF</Th>
-            <Th>Cidade</Th>
-            <Th>Estado</Th>
+            <Th cursor="pointer" id="name" onClick={e => orderTable(e)}>
+              Nome
+              {getOrderIcon('name')}
+            </Th>
+            <Th cursor="pointer" id="email" onClick={e => orderTable(e)}>
+              Email
+              {getOrderIcon('email')}
+            </Th>
+            <Th cursor="pointer" id="cgcCpf" onClick={e => orderTable(e)}>
+              CNPJ / CPF
+              {getOrderIcon('cgcCpf')}
+            </Th>
+            <Th cursor="pointer" id="city" onClick={e => orderTable(e)}>
+              Cidade
+              {getOrderIcon('city')}
+            </Th>
+            <Th cursor="pointer" id="state" onClick={e => orderTable(e)}>
+              Estado
+              {getOrderIcon('state')}
+            </Th>
           </Tr>
         </Thead>
         <Tbody>
           {customers.map((customer: ICustomer) => {
             return (
-              <Tr key={`${customer.id}`}>
+              <Tr key={`${customer.id}`} className={`${colorMode}-table-row`}>
                 <Td>
                   <i
                     className="bi bi-pencil-square"
@@ -154,7 +196,7 @@ const Customer = () => {
         current={currentPage}
         defaultPerPage={5}
         total={totalRecords}
-        setCurrent={handleChangeCurrent}
+        getCurrentPage={handleChangeCurrent}
         getPerPage={handleChangePerpage}
       />
     </div>

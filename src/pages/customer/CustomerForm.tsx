@@ -92,9 +92,8 @@ const CustomerForm = () => {
           };
         });
       })
-      .catch(error => {
+      .catch(() => {
         setLoading(false);
-        toastr.toastr('error', 'Ocorreu um erro ao obter os dados do CEP', error.message);
       });
   };
 

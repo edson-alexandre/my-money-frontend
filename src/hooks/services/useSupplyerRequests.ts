@@ -11,7 +11,7 @@ export const useSupplyerRequests = (): ICrudRequest<ISupplyer> => {
   const list = async (currentPage: number, perPage: number): Promise<IPaginationReturn<ISupplyer[]>> => {
     return await request
       .getManyPaginated({
-        path,
+        path: `${path}?page=${currentPage}&perPage=${perPage}`,
         sendAuthorization: true,
       })
       .then(supplyers => {
@@ -69,7 +69,7 @@ export const useSupplyerRequests = (): ICrudRequest<ISupplyer> => {
   const remove = async (id: string, supplyer: ISupplyer): Promise<void> => {
     return await request
       .remove({
-        path: `${path}/${remove}`,
+        path: `${path}/${id}`,
         sendAuthorization: true,
         body: supplyer,
       })
