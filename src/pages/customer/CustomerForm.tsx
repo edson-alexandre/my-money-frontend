@@ -2,7 +2,7 @@ import { Box, Button, Progress, Radio, RadioGroup, Stack } from '@chakra-ui/reac
 import { Input } from '../../components/my-input/Input.styled';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import PageTitle from '../../components/PageTitle/PageTitle';
+import PageTitle from '../../components/page-title/PageTitle';
 import { useCustomerRequests } from '../../hooks/services/useCustomerRequests';
 import * as yup from 'yup';
 import { TestContext } from 'yup';
@@ -212,6 +212,7 @@ const CustomerForm = () => {
           </Col>
           <Col cols={12} md={12}>
             <InputMask
+              mb={10}
               label={`${customer.personType === 'FISICA' ? 'CPF' : 'CNPJ'} `}
               mask={`${customer.personType === 'FISICA' ? '000.000.000-00' : '00.000.000/0000-00'} `}
               placeholder="Informe o CNPJ / CPF do cliente"
@@ -225,6 +226,7 @@ const CustomerForm = () => {
           </Col>
           <Col cols={12} md={12}>
             <Input
+              mb={10}
               label="Nome do cliente"
               placeholder="Informe o nome do cliente"
               p={5}
@@ -238,6 +240,7 @@ const CustomerForm = () => {
           <Col cols={12} md={12}>
             <Box className="mt-2">
               <Input
+                mb={10}
                 label="E-mail do cliente"
                 placeholder="Informe o e-mail do cliente"
                 p={5}
@@ -254,6 +257,7 @@ const CustomerForm = () => {
             <Box className="mt-2">
               <label style={{ marginTop: '10px' }}>Contato do Cliente</label>
               <Input
+                mb={10}
                 label="Contato do Cliente"
                 placeholder="Informe o contato do cliente"
                 value={`${customer.contact || ''}`}
@@ -266,6 +270,7 @@ const CustomerForm = () => {
 
           <Col cols={12} md={12}>
             <InputMask
+              mb={10}
               label="CEP"
               placeholder="Informe o CEP"
               mask={`00000-000`}
@@ -280,6 +285,7 @@ const CustomerForm = () => {
 
           <Col cols={12} md={8}>
             <Input
+              mb={10}
               label="Logradouro"
               placeholder="Informe o logradouro"
               value={`${customer.street}`}
@@ -293,6 +299,7 @@ const CustomerForm = () => {
           <Col cols={12} md={4}>
             <label style={{ marginTop: '10px' }}>Número</label>
             <Input
+              mb={10}
               label="Número do Endereço"
               placeholder="Informe o Número do endereço"
               value={`${customer.number}`}
@@ -305,6 +312,7 @@ const CustomerForm = () => {
           </Col>
           <Col cols={12} md={6}>
             <Input
+              mb={10}
               label="Bairro"
               placeholder="Informe o bairro"
               isLoading={loading}
@@ -318,6 +326,7 @@ const CustomerForm = () => {
           <Col cols={12} md={6}>
             <label style={{ marginTop: '10px' }}>Complemento</label>
             <Input
+              mb={10}
               label="Complemento"
               placeholder="Informe o complemento"
               value={`${customer.details}`}
@@ -330,6 +339,7 @@ const CustomerForm = () => {
           </Col>
           <Col cols={12} md={4}>
             <Input
+              mb={10}
               label="Cidade"
               placeholder="Informe o cidade"
               value={`${customer.city}`}
@@ -342,6 +352,7 @@ const CustomerForm = () => {
           </Col>
           <Col cols={12} md={4}>
             <Input
+              mb={10}
               label="Estado"
               placeholder="Informe o estado"
               value={`${customer.state}`}
@@ -355,6 +366,7 @@ const CustomerForm = () => {
           <Col cols={12} md={4}>
             <label style={{ marginTop: '10px' }}>País</label>
             <Input
+              mb={10}
               label="País"
               placeholder="Informe o país"
               isLoading={loading}
@@ -369,7 +381,7 @@ const CustomerForm = () => {
 
         <hr style={{ marginTop: '10px' }} />
         <Box marginTop={3}>
-          <Button colorScheme={'blue'} type="submit" size={'sm'} isLoading={loading}>
+          <Button colorScheme={'blue'} type="submit" size={'sm'} isLoading={loading} loadingText="Aguarde">
             Salvar
           </Button>
         </Box>

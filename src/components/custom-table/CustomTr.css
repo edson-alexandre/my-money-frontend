@@ -1,7 +1,8 @@
-.dark-table-row:hover {
+.dark-custom-tr:hover {
     background-color: #3d3d3d;
 }
 
-.light-table-row:hover {
+.light-custom-tr:hover {
     background-color: #afafaf;
 }
+

@@ -1,7 +1,7 @@
 import { Button, Radio, RadioGroup, Stack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import PageTitle from '../../components/PageTitle/PageTitle';
+import PageTitle from '../../components/page-title/PageTitle';
 import * as yup from 'yup';
 import { TestContext } from 'yup';
 import { cnpj, cpf } from 'cpf-cnpj-validator';
@@ -209,6 +209,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={12}>
             <InputMask
+              mb={10}
               mask="00.000.000/0000-00"
               label="CNPJ / CPF do Fornecedor"
               isLoading={loading}
@@ -222,6 +223,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={12}>
             <Input
+              mb={10}
               label="Nome do Fornecedor"
               isLoading={loading}
               isError={Boolean(errors?.name)}
@@ -234,6 +236,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={12}>
             <Input
+              mb={10}
               label="E-mail do Fornecedor"
               placeholder="Informe o e-mail do fornecedor"
               isLoading={loading}
@@ -246,6 +249,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={12}>
             <Input
+              mb={10}
               label="Contado do Fornecedor"
               placeholder="Informe o contato do fornecedor"
               isLoading={loading}
@@ -256,6 +260,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={12}>
             <InputMask
+              mb={10}
               mask="00000-000"
               label="CEP do Forneceor"
               placeholder="Informe o CEP do fornecedor"
@@ -270,6 +275,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={8}>
             <Input
+              mb={10}
               label="Logradouro"
               placeholder="Informe o logradouro"
               isLoading={loading}
@@ -282,6 +288,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={4}>
             <Input
+              mb={10}
               label="Número do Endereço"
               placeholder="Informe o número do endereço"
               isLoading={loading}
@@ -294,6 +301,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={6}>
             <Input
+              mb={10}
               label="Bairro"
               placeholder="Informe o bairro"
               isLoading={loading}
@@ -306,6 +314,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={6}>
             <Input
+              mb={10}
               label="Complemento do Endereço"
               placeholder="Informe o complemento"
               isLoading={loading}
@@ -316,6 +325,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={4}>
             <Input
+              mb={10}
               label="Cidade"
               placeholder="Informe a cidade"
               isError={Boolean(errors?.city)}
@@ -328,6 +338,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={4}>
             <Input
+              mb={10}
               label="Estado"
               placeholder="Informe o estado"
               isError={Boolean(errors?.state)}
@@ -340,6 +351,7 @@ const SupplyerForm = () => {
           </Col>
           <Col cols={12} md={4}>
             <Input
+              mb={10}
               label="País"
               placeholder="Informe o país"
               isError={Boolean(errors?.country)}
@@ -352,7 +364,7 @@ const SupplyerForm = () => {
           </Col>
         </Row>
         <div>
-          <Button type="submit" colorScheme="blue" className="mt-4">
+          <Button type="submit" colorScheme="blue" className="mt-4" isLoading={loading} loadingText="Aguarde">
             Salvar
           </Button>
         </div>

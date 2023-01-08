@@ -1,4 +1,5 @@
-import { SlideFade, ChakraProvider, Grid, GridItem, theme } from '@chakra-ui/react';
+import { SlideFade, ChakraProvider, Grid, GridItem, extendTheme } from '@chakra-ui/react';
+
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import Content from './layout/Content';
@@ -8,6 +9,8 @@ import MenuContext from './context/menu/MenuContext';
 import { useContext } from 'react';
 import UserContext from './context/user/UserContext';
 import { BrowserRouter } from 'react-router-dom';
+
+const theme = extendTheme({});
 
 export const App = () => {
   const { state: menuState } = useContext(MenuContext);

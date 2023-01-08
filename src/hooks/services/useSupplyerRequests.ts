@@ -8,10 +8,15 @@ export const useSupplyerRequests = (): ICrudRequest<ISupplyer> => {
   const path = 'supplyers';
   const request = useRequest<ISupplyer>();
 
-  const list = async (currentPage: number, perPage: number): Promise<IPaginationReturn<ISupplyer[]>> => {
+  const list = async (
+    currentPage: number,
+    perPage: number,
+    orderField: string,
+    orderDirection: string,
+  ): Promise<IPaginationReturn<ISupplyer[]>> => {
     return await request
       .getManyPaginated({
-        path: `${path}?page=${currentPage}&perPage=${perPage}`,
+        path: `${path}?page=${currentPage}&perPage=${perPage}&orderField=${orderField}&orderDirection=${orderDirection}`,
         sendAuthorization: true,
       })
       .then(supplyers => {

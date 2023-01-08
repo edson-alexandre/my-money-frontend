@@ -31,7 +31,7 @@ const Header = () => {
       alignItems="center"
       justifyContent="space-between"
       style={{
-        backgroundImage: 'linear-gradient(to right top, #56CCF2, #2F80ED)',
+        backgroundImage: 'linear-gradient(to right top, #56CCF2, #1d4e89)',
       }}
     >
       <Box display="flex" justifyContent="flex-start" alignItems="center" flex={1}>
@@ -49,7 +49,7 @@ const Header = () => {
         )}
       </Box>
       <Box fontSize="1.7em" fontWeight={900} display="flex">
-        My Money
+        Gerenciador Financeiro
       </Box>
       <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
         <ColorModeSwitcher />

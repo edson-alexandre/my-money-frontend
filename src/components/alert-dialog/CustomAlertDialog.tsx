@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -14,15 +14,17 @@ import { ICustomAlertRef } from '../../interfaces/ICustomAlertRef';
 interface ICustomAlertProps {
   title?: string;
   message?: string;
-  confirm(): void;
+  confirm(obj?: any): void;
 }
 
 export const CustomAlertDialog = forwardRef<ICustomAlertRef, ICustomAlertProps>((props: ICustomAlertProps, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef(null);
+  const [obj, setObj] = useState();
 
   useImperativeHandle(ref, () => ({
-    open() {
+    open(obj?: any) {
+      setObj({ ...obj });
       onOpen();
     },
   }));
@@ -44,7 +46,7 @@ export const CustomAlertDialog = forwardRef<ICustomAlertRef, ICustomAlertProps>(
                 colorScheme="whatsapp"
                 onClick={() => {
                   onClose();
-                  props.confirm();
+                  props.confirm(obj);
                 }}
                 ml={3}
               >

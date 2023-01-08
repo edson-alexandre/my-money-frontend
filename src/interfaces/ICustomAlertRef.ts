@@ -1,4 +1,4 @@
 export interface ICustomAlertRef {
-  open?(): void;
+  open?(obj?: any): void;
   title?: string;
 }

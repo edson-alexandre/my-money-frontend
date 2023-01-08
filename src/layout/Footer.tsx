@@ -9,7 +9,7 @@ const Footer = () => {
       alignItems="center"
       justifyContent="flex-end"
       style={{
-        backgroundImage: 'linear-gradient(to right top, #56CCF2, #2F80ED)',
+        backgroundImage: 'linear-gradient(to right top, #56CCF2, #1d4e89)',
       }}
     >
       <div style={{ fontWeight: 500 }}>Gerenciador Financeiro</div>

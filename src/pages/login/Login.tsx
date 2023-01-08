@@ -107,7 +107,7 @@ const Login = () => {
         width="500px"
         height="300px"
         borderRadius={10}
-        backgroundColor={colorMode === 'dark' ? '#33acdd' : '#33acdd'}
+        backgroundImage={'linear-gradient(to right top, #56CCF2, #1d4e89)'}
         p={5}
       >
         <Box display="flex" justifyContent="center" fontSize="1.3em" fontWeight={600}>

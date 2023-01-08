@@ -2,7 +2,7 @@ import { Box } from '@chakra-ui/react';
 import { useState } from 'react';
 import './Nav.css';
 import { Collapse } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import CustomNavLink from '../components/custom-nav-link/CustomNavLink';
 
 const Nav = () => {
   const [toggleRegistration, setToggleRegistration] = useState(false);
@@ -24,13 +24,13 @@ const Nav = () => {
       <Collapse in={toggleRegistration}>
         <div>
           <div className="item-menu">
-            <Link to={'/account'}>Plano de Contas</Link>
+            <CustomNavLink to={'/account'}>Plano de Contas </CustomNavLink>
           </div>
           <div className="item-menu">
-            <Link to={'/customer'}>Clientes</Link>
+            <CustomNavLink to={'/customer'}>Clientes</CustomNavLink>
           </div>
           <div className="item-menu">
-            <Link to={'/supplier'}>Fornecedores</Link>
+            <CustomNavLink to={'/supplier'}>Fornecedores</CustomNavLink>
           </div>
         </div>
       </Collapse>
@@ -41,10 +41,10 @@ const Nav = () => {
       <Collapse in={toggleMovements}>
         <div>
           <div className="item-menu">
-            <Link to={'/accounts-payable'}>Contas a Pagar</Link>
+            <CustomNavLink to={'/accounts-payable'}>Contas a Pagar</CustomNavLink>
           </div>
           <div className="item-menu">
-            <Link to={'/accounts-receivable'}>Contas a Receber</Link>
+            <CustomNavLink to={'/accounts-receivable'}>Contas a Receber</CustomNavLink>
           </div>
         </div>
       </Collapse>

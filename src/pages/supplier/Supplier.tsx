@@ -1,12 +1,13 @@
-import { Table, Th, Thead, Tr, Tbody, Td, Button, Progress } from '@chakra-ui/react';
+import { Button, IconButton, Progress } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CustomAlertDialog } from '../../components/AlertDialog/CustomAlertDialog';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import { Pagination } from '../../components/pagination/Pagination';
+import { CustomAlertDialog } from '../../components/alert-dialog/CustomAlertDialog';
+import { CustomTable, CustomTd, CustomTr, CustomPagination } from '../../components/custom-table';
+import PageTitle from '../../components/page-title/PageTitle';
 import { useToastr } from '../../hooks-util/useToastr';
 import { useSupplyerRequests } from '../../hooks/services/useSupplyerRequests';
 import { ICustomAlertRef } from '../../interfaces/ICustomAlertRef';
+import { IOrderData } from '../../interfaces/IOrderData';
 import { ISupplyer } from '../../interfaces/ISupplyer';
 
 const initialSupplyer: ISupplyer = {
@@ -23,15 +24,10 @@ const initialSupplyer: ISupplyer = {
   country: '',
 };
 
-interface IOrder {
-  order: Boolean;
-  field: string;
-}
-
 const Supplier = () => {
-  const [orderSupplyer, setOrderSupplyer] = useState<IOrder>({
-    order: false,
-    field: '',
+  const [orderSupplyer, setOrderSupplyer] = useState<IOrderData>({
+    order: 'ASC',
+    field: 'name',
   });
   const alertRef = useRef<ICustomAlertRef>(null);
   const [totalRecords, setTotalRecords] = useState<number>(0);
@@ -44,6 +40,14 @@ const Supplier = () => {
   const [loading, setLoading] = useState(false);
   const [supplyer, setSupplyer] = useState<ISupplyer>({ ...initialSupplyer });
   const [supplyerId, setSupplyerId] = useState<string>('');
+  const [tableHeads] = useState([
+    { label: 'Ações', field: 'action' },
+    { label: 'Nome', field: 'name', orderAble: true },
+    { label: 'E-mail', field: 'email', orderAble: true },
+    { label: 'CNPJ / CPF', field: 'cgcCpf', orderAble: true },
+    { label: 'Cidade', field: 'city', orderAble: true },
+    { label: 'Estado', field: 'state', orderAble: true },
+  ]);
 
   const remove = async () => {
     setLoading(true);
@@ -63,7 +67,7 @@ const Supplier = () => {
   const listSupplyers = async () => {
     setLoading(true);
     await supplyerRequest
-      .list?.(currentPage, perPage)
+      .list?.(currentPage, perPage, orderSupplyer.field, orderSupplyer.order)
       .then(async result => {
         await setSupplyers([...result.data]);
         setTotalRecords(result.total);
@@ -83,51 +87,12 @@ const Supplier = () => {
 
   useEffect(() => {
     listSupplyers();
-  }, [currentPage, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleChangeCurrent = (current: number) => {
-    setCurrentPage(current);
-  };
-
-  const handleChangePerpage = (current: number) => {
-    setPerPage(current);
-  };
-
-  useEffect(() => {
-    setSupplyers(state => {
-      return [
-        ...state.sort((a: ISupplyer, b: ISupplyer) => {
-          if (a[`${orderSupplyer.field}`] > b[`${orderSupplyer.field}`]) {
-            return orderSupplyer.order ? -1 : 1;
-          } else {
-            return orderSupplyer.order ? 1 : -1;
-          }
-        }),
-      ];
-    });
-  }, [orderSupplyer]);
-
-  const getOrderIcon = (name: string) => {
-    return (
-      <i
-        style={{ marginLeft: '10px' }}
-        className={`bi bi-arrow-${name === orderSupplyer.field && orderSupplyer.order ? 'up' : 'down'}-short`}
-      ></i>
-    );
-  };
-
-  const orderTable = (event: React.MouseEvent<HTMLElement>) => {
-    setOrderSupplyer({
-      ...orderSupplyer,
-      order: !orderSupplyer.order,
-      field: event?.currentTarget.id,
-    });
-  };
+  }, [currentPage, perPage, orderSupplyer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="p-2">
       <PageTitle title="CADASTRO DE FORNECEDORES" />
-      <Button className="my-4" colorScheme="blue" onClick={() => navigate(`/supplyer/0/new`)}>
+      <Button size="sm" className="my-4" colorScheme="blue" onClick={() => navigate(`/supplyer/0/new`)}>
         Novo Fornecedor
       </Button>
       <CustomAlertDialog
@@ -137,64 +102,48 @@ const Supplier = () => {
         message="Confirma a exclusão do fornecedor?"
       />
       {loading ? <Progress isIndeterminate size="xs" /> : null}
-      <Table>
-        <Thead>
-          <Tr>
-            <Th>Ações</Th>
-            <Th cursor="pointer" id="name" onClick={e => orderTable(e)}>
-              Nome
-              {getOrderIcon('name')}
-            </Th>
-            <Th cursor="pointer" id="email" onClick={e => orderTable(e)}>
-              Email
-              {getOrderIcon('email')}
-            </Th>
-            <Th cursor="pointer" id="cgcCpf" onClick={e => orderTable(e)}>
-              CNPJ / CPF
-              {getOrderIcon('cgcCpf')}
-            </Th>
-            <Th cursor="pointer" id="city" onClick={e => orderTable(e)}>
-              Cidade
-              {getOrderIcon('city')}
-            </Th>
-            <Th cursor="pointer" id="state" onClick={e => orderTable(e)}>
-              Estado
-              {getOrderIcon('state')}
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {supplyers.map(supplyer => {
-            return (
-              <Tr key={`${supplyer.id}`}>
-                <Td>
-                  <i
-                    className="bi bi-pencil-square"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => navigate(`/supplyer/${supplyer.id}/edit`)}
-                  />
-                  <i
-                    className="bi bi-trash3 "
-                    style={{ cursor: 'pointer', marginLeft: 15 }}
-                    onClick={() => confirmRemove(`${supplyer?.id}`, supplyer)}
-                  />
-                </Td>
-                <Td>{supplyer.name}</Td>
-                <Td>{supplyer.email}</Td>
-                <Td>{supplyer.cgcCpf}</Td>
-                <Td>{supplyer.city}</Td>
-                <Td>{supplyer.state}</Td>
-              </Tr>
-            );
-          })}
-        </Tbody>
-      </Table>
-      <Pagination
+      <CustomTable
+        initialOrder={{ ...orderSupplyer }}
+        heads={tableHeads}
+        getOrder={({ order, field }) => setOrderSupplyer({ order, field })}
+      >
+        {supplyers.map(supplyer => {
+          return (
+            <CustomTr key={`${supplyer.id}`} hoverAble={true}>
+              <CustomTd>
+                <IconButton
+                  mr={1}
+                  variant="ghost"
+                  aria-label="Editar"
+                  size="sm"
+                  isRound
+                  onClick={() => navigate(`/supplyer/${supplyer.id}/edit`)}
+                  icon={<i className="bi bi-pencil-square" />}
+                />
+                <IconButton
+                  variant="ghost"
+                  aria-label="Editar"
+                  size="sm"
+                  isRound
+                  onClick={() => confirmRemove(`${supplyer?.id}`, supplyer)}
+                  icon={<i className="bi bi-trash3 " />}
+                />
+              </CustomTd>
+              <CustomTd>{supplyer.name}</CustomTd>
+              <CustomTd>{supplyer.email}</CustomTd>
+              <CustomTd>{supplyer.cgcCpf}</CustomTd>
+              <CustomTd>{supplyer.city}</CustomTd>
+              <CustomTd>{supplyer.state}</CustomTd>
+            </CustomTr>
+          );
+        })}
+      </CustomTable>
+      <CustomPagination
         current={currentPage}
         defaultPerPage={5}
         total={totalRecords}
-        getCurrentPage={handleChangeCurrent}
-        getPerPage={handleChangePerpage}
+        getCurrentPage={value => setCurrentPage(value)}
+        getPerPage={value => setPerPage(value)}
       />
     </div>
   );

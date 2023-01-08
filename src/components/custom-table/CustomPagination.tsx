@@ -35,7 +35,7 @@ const Next = styled.span`
   cursor: pointer;
 `;
 
-const Pagination = (props: IPaginationProps) => {
+const CustomPagination = (props: IPaginationProps) => {
   const [perPage, setPerPage] = useState<number>(props.defaultPerPage);
 
   const increment = () => {
@@ -92,4 +92,4 @@ const Pagination = (props: IPaginationProps) => {
   );
 };
 
-export { Pagination };
+export default CustomPagination;

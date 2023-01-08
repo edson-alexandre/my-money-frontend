@@ -1,14 +1,16 @@
-import { Button, Progress, Table, Tbody, Td, Th, Thead, Tr, useColorModeValue } from '@chakra-ui/react';
+import { Button, IconButton, Progress } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CustomAlertDialog } from '../../components/AlertDialog/CustomAlertDialog';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import { Pagination } from '../../components/pagination/Pagination';
+import { CustomAlertDialog } from '../../components/alert-dialog/CustomAlertDialog';
+import { CustomTable, CustomTr, CustomTd, CustomPagination } from '../../components/custom-table';
+import PageTitle from '../../components/page-title/PageTitle';
+
 import { useToastr } from '../../hooks-util/useToastr';
 import { useCustomerRequests } from '../../hooks/services/useCustomerRequests';
 import { ICustomAlertRef } from '../../interfaces/ICustomAlertRef';
 import { ICustomer } from '../../interfaces/ICustomer';
-import './Customer.css';
+import ICustomHead from '../../interfaces/ICustomHead';
+import { IOrderData } from '../../interfaces/IOrderData';
 
 const initialCustomer = {
   name: '',
@@ -26,17 +28,21 @@ const initialCustomer = {
   country: '',
 };
 
-interface IOrder {
-  order: Boolean;
-  field: string;
-}
-
 const Customer = () => {
-  const [orderCustomers, setOrderCustomers] = useState<IOrder>({
-    order: false,
-    field: '',
+  const [orderCustomers, setOrderCustomers] = useState<IOrderData>({
+    order: 'ASC',
+    field: 'name',
   });
-  const colorMode = useColorModeValue('light', 'dark');
+
+  const [tableHeads] = useState<ICustomHead[]>([
+    { label: 'Ações', field: 'action' },
+    { label: 'Nome', field: 'name', orderAble: true },
+    { label: 'E-mail', field: 'email', orderAble: true },
+    { label: 'CNPJ / CPF', field: 'cgcCpf', orderAble: true },
+    { label: 'Cidade', field: 'city', orderAble: true },
+    { label: 'Estado', field: 'state', orderAble: true },
+  ]);
+
   const [customers, setCustomers] = useState<ICustomer[]>([{ ...initialCustomer }]);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -52,7 +58,7 @@ const Customer = () => {
   const loadCustomers = async () => {
     setLoading(true);
     await customerRequest
-      .list?.(currentPage, perPage)
+      .list?.(currentPage, perPage, orderCustomers.field, orderCustomers.order)
       .then(result => {
         setLoading(false);
         setCustomers(result.data);
@@ -86,52 +92,13 @@ const Customer = () => {
   };
   useEffect(() => {
     loadCustomers();
-  }, [currentPage, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleChangeCurrent = (current: number) => {
-    setCurrentPage(current);
-  };
-
-  const handleChangePerpage = (current: number) => {
-    setPerPage(current);
-  };
-
-  useEffect(() => {
-    setCustomers(state => {
-      return [
-        ...state.sort((a: ICustomer, b: ICustomer) => {
-          if (a[`${orderCustomers.field}`] > b[`${orderCustomers.field}`]) {
-            return orderCustomers.order ? -1 : 1;
-          } else {
-            return orderCustomers.order ? 1 : -1;
-          }
-        }),
-      ];
-    });
-  }, [orderCustomers]);
-
-  const getOrderIcon = (name: string) => {
-    return (
-      <i
-        style={{ marginLeft: '10px' }}
-        className={`bi bi-arrow-${name === orderCustomers.field && orderCustomers.order ? 'up' : 'down'}-short`}
-      ></i>
-    );
-  };
-
-  const orderTable = (event: React.MouseEvent<HTMLElement>) => {
-    setOrderCustomers({
-      ...orderCustomers,
-      order: !orderCustomers.order,
-      field: event?.currentTarget.id,
-    });
-  };
+  }, [currentPage, perPage, orderCustomers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="p-2">
       <PageTitle title="CADASTRO DE CLIENTES" />
       {!loading || <Progress size="xs" isIndeterminate />}
-      <Button className="my-4" colorScheme="blue" onClick={() => navigate(`/customer/0/new`)}>
+      <Button size="sm" className="my-4" colorScheme="blue" onClick={() => navigate(`/customer/0/new`)}>
         Novo Cliente
       </Button>
       <CustomAlertDialog
@@ -140,64 +107,49 @@ const Customer = () => {
         title="Confirmar Exclusão"
         message="Confirma a exclusão do cliente?"
       />
-      <Table>
-        <Thead>
-          <Tr>
-            <Th>Ações</Th>
-            <Th cursor="pointer" id="name" onClick={e => orderTable(e)}>
-              Nome
-              {getOrderIcon('name')}
-            </Th>
-            <Th cursor="pointer" id="email" onClick={e => orderTable(e)}>
-              Email
-              {getOrderIcon('email')}
-            </Th>
-            <Th cursor="pointer" id="cgcCpf" onClick={e => orderTable(e)}>
-              CNPJ / CPF
-              {getOrderIcon('cgcCpf')}
-            </Th>
-            <Th cursor="pointer" id="city" onClick={e => orderTable(e)}>
-              Cidade
-              {getOrderIcon('city')}
-            </Th>
-            <Th cursor="pointer" id="state" onClick={e => orderTable(e)}>
-              Estado
-              {getOrderIcon('state')}
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {customers.map((customer: ICustomer) => {
-            return (
-              <Tr key={`${customer.id}`} className={`${colorMode}-table-row`}>
-                <Td>
-                  <i
-                    className="bi bi-pencil-square"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => navigate(`/customer/${customer.id}/edit`)}
-                  />
-                  <i
-                    className="bi bi-trash3 "
-                    style={{ cursor: 'pointer', marginLeft: 15 }}
-                    onClick={() => confirmRemove(`${customer.id}`, customer)}
-                  />
-                </Td>
-                <Td>{customer.name}</Td>
-                <Td>{customer.email}</Td>
-                <Td>{customer.cgcCpf}</Td>
-                <Td>{customer.city}</Td>
-                <Td>{customer.state}</Td>
-              </Tr>
-            );
-          })}
-        </Tbody>
-      </Table>
-      <Pagination
+      <CustomTable
+        initialOrder={{ ...orderCustomers }}
+        heads={tableHeads}
+        getOrder={({ order, field }) => setOrderCustomers({ order, field })}
+        isEmpty={customers.length === 0}
+      >
+        {customers.map((customer: ICustomer) => {
+          return (
+            <CustomTr key={`${customer.id}`} hoverAble={true}>
+              <CustomTd>
+                <IconButton
+                  mr={1}
+                  variant="ghost"
+                  aria-label="Editar"
+                  size="sm"
+                  isRound
+                  onClick={() => navigate(`/customer/${customer.id}/edit`)}
+                  icon={<i className="bi bi-pencil-square" />}
+                />
+                <IconButton
+                  variant="ghost"
+                  aria-label="Editar"
+                  size="sm"
+                  isRound
+                  onClick={() => confirmRemove(`${customer.id}`, customer)}
+                  icon={<i className="bi bi-trash3" />}
+                />
+              </CustomTd>
+              <CustomTd>{customer.name}</CustomTd>
+              <CustomTd>{customer.email}</CustomTd>
+              <CustomTd>{customer.cgcCpf}</CustomTd>
+              <CustomTd>{customer.city}</CustomTd>
+              <CustomTd>{customer.state}</CustomTd>
+            </CustomTr>
+          );
+        })}
+      </CustomTable>
+      <CustomPagination
         current={currentPage}
         defaultPerPage={5}
         total={totalRecords}
-        getCurrentPage={handleChangeCurrent}
-        getPerPage={handleChangePerpage}
+        getCurrentPage={value => setCurrentPage(value)}
+        getPerPage={value => setPerPage(value)}
       />
     </div>
   );

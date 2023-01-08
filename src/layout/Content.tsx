@@ -1,54 +1,26 @@
-import { Box, useColorModeValue } from '@chakra-ui/react';
+import { useColorModeValue } from '@chakra-ui/react';
 import { useContext } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import MenuContext from '../context/menu/MenuContext';
 import UserContext from '../context/user/UserContext';
-import Account from '../pages/account/Account';
-import AccountsPayable from '../pages/accountsPayable/AccountsPayable';
-import AccountsReceivable from '../pages/accountsReceivable/AccountsReceivable';
-import Customer from '../pages/customer/Customer';
-import CustomerForm from '../pages/customer/CustomerForm';
-import Home from '../pages/Home/Home';
-import Login from '../pages/login/Login';
-import Supplier from '../pages/supplier/Supplier';
-import SupplyerForm from '../pages/supplier/SupplyerForm';
+import Router from './Router';
 
 const Content = () => {
-  const { state } = useContext(UserContext);
   const colorMode = useColorModeValue('light', 'dark');
+  const { state: menuState } = useContext(MenuContext);
+  const { state: userState } = useContext(UserContext);
 
   return (
-    <Box
+    <div
       style={{
         height: 'calc(100vh - 45px - 30px)', // view height - header - footer
         overflow: 'auto',
-        width: '100%',
+        width: menuState.isVisible && userState.logged ? 'calc(100vw - 250px)' : '100vw',
         flex: 1,
-        backgroundColor: colorMode === 'dark' ? '#222' : '#dfdfdf',
+        backgroundColor: colorMode === 'dark' ? '#222' : '#efefef',
       }}
     >
-      <Routes>
-        {state.logged ? (
-          <>
-            <Route path="/home" element={<Home />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/customer" element={<Customer />} />
-            <Route path="/customer/:id/edit" element={<CustomerForm />} />
-            <Route path="/customer/:id/new" element={<CustomerForm />} />
-            <Route path="/supplier" element={<Supplier />} />
-            <Route path="/supplyer/:id/edit" element={<SupplyerForm />} />
-            <Route path="/supplyer/:id/new" element={<SupplyerForm />} />
-            <Route path="/accounts-receivable" element={<AccountsReceivable />} />
-            <Route path="/accounts-payable" element={<AccountsPayable />} />
-            <Route path="*" element={<Navigate to="/home" />} />
-          </>
-        ) : (
-          <>
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<Navigate to="/login" />} />
-          </>
-        )}
-      </Routes>
-    </Box>
+      <Router />
+    </div>
   );
 };
 
